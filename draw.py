@@ -16,6 +16,7 @@ class draw:
         self.cellheight = 0
         self.rect = {}
         self.text = {}
+        self.cells = {}
         self.lines = []
         self.costy = 0
         self.cost = 0
@@ -53,12 +54,18 @@ class draw:
         self.text[10,self.costy] = self.myCanvas.create_text(20, self.costy, text="Cost: ")
         self.cost = self.myCanvas.create_text(50, self.costy, text=0)
 
+    def place_all(self, cells):
+        for each in self.cells:
+            self.myCanvas.delete(each)
+        for i,cell in enumerate(cells):
+            self.place(cell.x,cell.y,i)
+
     def place(self, x, y, num):
         x1 = x * (self.cellwidth + self.buffer) + self.buffer
         y1 = y * (self.cellheight + self.buffer) + self.buffer
         x2 = x1 + self.cellwidth
         y2 = y1 + self.cellheight
-        self.text[x, y] = self.myCanvas.create_text((x1+x2)/2, (y1+y2)/2, text=num)
+        self.cells[x, y] = self.myCanvas.create_text((x1+x2)/2, (y1+y2)/2, text=num)
 
     def draw_net(self, x1, y1, x2, y2):
         startx = x1 * (self.cellwidth + self.buffer) + self.buffer + self.cellwidth/2

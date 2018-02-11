@@ -12,6 +12,7 @@ def read_infile():
     filename = file.get()
     f = open(dir+filename, "r")
     myCircuit = Circuit(f,myapp)
+    f.close()
 
 
 ## main ##

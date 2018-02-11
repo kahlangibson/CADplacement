@@ -2,7 +2,7 @@ import simAnneal
 from random import *
 
 
-class Cell:
+class Cell(object):
     """ Cell object with x,y position
     """
     def __init__(self, x, y):
@@ -20,7 +20,6 @@ class Circuit:
             if len([s for s in line]) is 0:
                 # empty line, read next
                 line = f.readline().split()
-            print line
             net = [int(line[1])]
             net.append([int(s) for s in line[2:]])
             self.nets.append(net)
@@ -53,12 +52,14 @@ class Circuit:
         return False
 
     def put_cell(self, x, y, num):
-        """ Places cell #num on the array at position x,y
+        """ Places cell #num on the array at empty position x,y
         sets:
             - self.grid at x,y, and updates image with initial placement
         returns:
             False if the cell fails not_empty
             True otherwise
+        :param x: x value of cell
+        :param y: y value of cell
         """
         if self.is_empty(x,y):
             self.grid[y][x] = num
@@ -89,12 +90,71 @@ class Circuit:
 
         assert self.calc_cost() is True
 
+    def switch(self, x1, y1, x2, y2):
+        """ Switches cells specified by x1,y1 and x2,y2
+        :param x1: x coordinate of cell1
+        :param y1: y coordinate of cell1
+        :param x2: x coordinate of cell2
+        :param y2: y coordinate of cell2
+        assumes:
+            - at least one cell is not empty
+        sets:
+            - self.grid, and updates image with new placement
+            - self.cells, and updates new position for moved cell
+            - self.cost
+        asserts:
+            - if failure to switch cells (both cells are empty)
+        """
+        # both positions should not be empty
+        assert (self.is_empty(x1,y1) is not True) or (self.is_empty(x2,y2) is not True)
+        # x1,y1 is empty
+        if self.is_empty(x1, y1):
+            self.grid[y1][x1] = self.grid[y2][x2]
+            self.cells[self.grid[y2][x2]].x = x1
+            self.cells[self.grid[y2][x2]].y = y1
+            self.grid[y2][x2] = ' '
+        # x2,y2 is empty
+        elif self.is_empty(x2, y2):
+            self.grid[y2][x2] = self.grid[y1][x1]
+            self.cells[self.grid[y1][x1]].x = x2
+            self.cells[self.grid[y1][x1]].y = y2
+            self.grid[y1][x1] = ' '
+        else:
+            n = self.grid[y2][x2]
+            self.grid[y2][x2] = self.grid[y1][x1]
+            self.cells[self.grid[y1][x1]].x = x2
+            self.cells[self.grid[y1][x1]].y = y2
+            self.grid[y1][x1] = n
+            self.cells[n].x = x1
+            self.cells[n].y = y1
+
+        if self.picture is not None:
+            self.picture.place_all(self.cells)
+
+        assert self.calc_cost() is True
+
+    def compare_switch_cost(self, x1, y1, x2, y2):
+        """ Compares the cost functions of the switching of cells at x1,y1 and x2,y2
+        :param x1: x coordinate of cell1
+        :param y1: y coordinate of cell1
+        :param x2: x coordinate of cell2
+        :param y2: y coordinate of cell2
+        :return: the difference in cost function
+        """
+        cost = self.cost
+        self.switch(x1,y1,x2,y2)
+        deltaC = self.cost - cost
+        self.switch(x1,y1,x2,y2)
+        assert cost == self.cost
+        return deltaC
+
     def calc_cost(self):
         """ Calculates the cost of current placement given net hierarchy
         assumes:
             - valid net list in self.nets
         sets:
             - self.cost
+        :return: True once complete
         """
         cost = 0
         if self.picture is not None:
@@ -110,10 +170,11 @@ class Circuit:
         """ Calculates the half perimeter smallest bounding box cost of a net
         assumes:
             - valid cell positions in source, sinks
-        returns:
-            - self.cost
         asserts:
             - if failure to calculate cost (any cell x,y not in grid range)
+        :param source: index of the source cell
+        :param sinks: indices of the sink cells
+        :return: half-perimeter cost of the net
         """
         deltax = 0
         deltay = 0
