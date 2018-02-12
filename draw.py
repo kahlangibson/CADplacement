@@ -71,11 +71,13 @@ class draw(Circuit):
         """
         sleep(0.0001)
         self.total_proposed += 1.
-        # randomly choose 2 cells - until at least one is not empty
-        while True:
-            [x1, x2, y1, y2] = sample(range(self.nx), 2) + sample(range(self.ny), 2)
-            if not self.is_empty(x1, y1) or not self.is_empty(x2, y2):
-                break
+        # randomly choose 2 cells
+        # pick a cell from list
+        c = sample(self.cells,1)[0]
+        x1 = c.x
+        y1 = c.y
+        # randomly pick another position - may be cell, may be empty
+        [x2, y2] = sample(range(self.nx), 1) + sample(range(self.ny), 1)
         self.pick(x1, y1, True)
         self.pick(x2, y2, True)
         # switch and calculate delta cost

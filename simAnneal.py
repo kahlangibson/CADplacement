@@ -21,11 +21,12 @@ class simAnneal(Circuit):
             total_proposed = 0.
             for _ in range(self.n):
                 total_proposed += 1.
-                # randomly choose 2 cells - until at least one is not empty
-                while True:
-                    [x1, x2, y1, y2] = sample(range(self.nx), 2) + sample(range(self.ny), 2)
-                    if not self.is_empty(x1, y1) or not self.is_empty(x2, y2):
-                        break
+                # randomly choose a cell
+                c = sample(self.cells, 1)[0]
+                x1 = c.x
+                y1 = c.y
+                # randomly pick another position - may be cell, may be empty
+                [x2, y2] = sample(range(self.nx), 1) + sample(range(self.ny), 1)
                 # switch and calculate delta cost
                 deltaC = self.compare_switch_cost(x1, y1, x2, y2)
                 # generate random number
