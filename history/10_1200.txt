@@ -1,0 +1,108 @@
+apex1.txt
+Size: 38, 22
+Num Cells: 786
+Minimum Cost: 12354
+   runWith0 : True
+   beta : 0.95
+   exitRate : 0.25
+   startT : 10.0
+   n : 1200
+apex4.txt
+Size: 50, 28
+Num Cells: 1290
+Minimum Cost: 25120
+   runWith0 : True
+   beta : 0.95
+   exitRate : 0.25
+   startT : 10.0
+   n : 1200
+cm162a.txt
+Size: 9, 6
+Num Cells: 37
+Minimum Cost: 82
+   runWith0 : True
+   beta : 0.95
+   exitRate : 0.35
+   startT : 10.0
+   n : 1200
+cps.txt
+Size: 40, 28
+Num Cells: 882
+Minimum Cost: 11370
+   runWith0 : True
+   beta : 0.95
+   exitRate : 0.25
+   startT : 10.0
+   n : 1200
+cm138a.txt
+Size: 8, 4
+Num Cells: 24
+Minimum Cost: 36
+   runWith0 : True
+   beta : 0.95
+   exitRate : 0.35
+   startT : 10.0
+   n : 1200
+paira.txt
+Size: 40, 30
+Num Cells: 951
+Minimum Cost: 13967
+   runWith0 : True
+   beta : 0.95
+   exitRate : 0.25
+   startT : 10.0
+   n : 1200
+pairb.txt
+Size: 70, 50
+Num Cells: 951
+Minimum Cost: 21325
+   runWith0 : True
+   beta : 0.95
+   exitRate : 0.25
+   startT : 10.0
+   n : 1200
+alu2.txt
+Size: 25, 15
+Num Cells: 213
+Minimum Cost: 1575
+   runWith0 : True
+   beta : 0.95
+   exitRate : 0.25
+   startT : 10.0
+   n : 1200
+cm150a.txt
+Size: 8, 5
+Num Cells: 36
+Minimum Cost: 67
+   runWith0 : True
+   beta : 0.95
+   exitRate : 0.25
+   startT : 10.0
+   n : 1200
+e64.txt
+Size: 26, 16
+Num Cells: 403
+Minimum Cost: 3722
+   runWith0 : True
+   beta : 0.95
+   exitRate : 0.25
+   startT : 10.0
+   n : 1200
+C880.txt
+Size: 20, 15
+Num Cells: 260
+Minimum Cost: 1926
+   runWith0 : True
+   beta : 0.95
+   exitRate : 0.25
+   startT : 10.0
+   n : 1200
+cm151a.txt
+Size: 8, 8
+Num Cells: 22
+Minimum Cost: 40
+   runWith0 : True
+   beta : 0.95
+   exitRate : 0.25
+   startT : 10.0
+   n : 1200

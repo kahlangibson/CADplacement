@@ -1,4 +1,3 @@
-import simAnneal
 from random import *
 
 
@@ -11,22 +10,23 @@ class Cell(object):
 
 
 class Circuit:
-    def __init__(self, f, picture):
+    def __init__(self, f):
         [self.numCells, self.numNets, self.ny, self.nx] = [int(s) for s in f.readline().split()]
 
         self.nets = []
+        self.costs = []
         for _ in range(self.numNets):
             line = f.readline().split()
             if len([s for s in line]) is 0:
                 # empty line, read next
                 line = f.readline().split()
+            # source of net
             net = [int(line[1])]
+            # sinks of net
             net.append([int(s) for s in line[2:]])
             self.nets.append(net)
-
-        self.picture = picture
-        if self.picture is not None:
-            self.picture.make(self.ny, self.nx)
+            self.costs.append(0)
+        f.close()
 
         self.grid = []
         for _ in range(self.ny):
@@ -63,8 +63,6 @@ class Circuit:
         """
         if self.is_empty(x,y):
             self.grid[y][x] = num
-            if self.picture is not None:
-                self.picture.place(x, y, num)
             return True
         return False
 
@@ -106,19 +104,21 @@ class Circuit:
             - if failure to switch cells (both cells are empty)
         """
         # both positions should not be empty
-        assert (self.is_empty(x1,y1) is not True) or (self.is_empty(x2,y2) is not True)
+        assert (self.is_empty(x1, y1) is not True) or (self.is_empty(x2, y2) is not True)
         # x1,y1 is empty
         if self.is_empty(x1, y1):
             self.grid[y1][x1] = self.grid[y2][x2]
             self.cells[self.grid[y2][x2]].x = x1
             self.cells[self.grid[y2][x2]].y = y1
             self.grid[y2][x2] = ' '
+            self.update_cost(self.grid[y1][x1])
         # x2,y2 is empty
         elif self.is_empty(x2, y2):
             self.grid[y2][x2] = self.grid[y1][x1]
             self.cells[self.grid[y1][x1]].x = x2
             self.cells[self.grid[y1][x1]].y = y2
             self.grid[y1][x1] = ' '
+            self.update_cost(self.grid[y2][x2])
         else:
             n = self.grid[y2][x2]
             self.grid[y2][x2] = self.grid[y1][x1]
@@ -127,11 +127,8 @@ class Circuit:
             self.grid[y1][x1] = n
             self.cells[n].x = x1
             self.cells[n].y = y1
-
-        if self.picture is not None:
-            self.picture.place_all(self.cells)
-
-        assert self.calc_cost() is True
+            self.update_cost(self.grid[y1][x1])
+            self.update_cost(self.grid[y2][x2])
 
     def compare_switch_cost(self, x1, y1, x2, y2):
         """ Compares the cost functions of the switching of cells at x1,y1 and x2,y2
@@ -144,12 +141,11 @@ class Circuit:
         cost = self.cost
         self.switch(x1,y1,x2,y2)
         deltaC = self.cost - cost
-        self.switch(x1,y1,x2,y2)
-        assert cost == self.cost
         return deltaC
 
-    def calc_cost(self):
-        """ Calculates the cost of current placement given net hierarchy
+    def update_cost(self, id):
+        """ Calculates the updated cost given a moved net with index id, to prevent recalculating full cost
+        :param: id: the if of the source/sink cell that was moved
         assumes:
             - valid net list in self.nets
         sets:
@@ -157,13 +153,32 @@ class Circuit:
         :return: True once complete
         """
         cost = 0
-        if self.picture is not None:
-            self.picture.clear_nets()
-        for [source, sinks] in self.nets:
-            cost += self.calc_half_perimeter(source, sinks)
+        for i, [source, sinks] in enumerate(self.nets):
+            if id == source:
+                self.costs[i] = self.calc_half_perimeter(source, sinks)
+                cost += self.costs[i]
+            elif id in sinks:
+                self.costs[i] = self.calc_half_perimeter(source, sinks)
+                cost += self.costs[i]
+            else:
+                cost += self.costs[i]
+
         self.cost = cost
-        if self.picture is not None:
-            self.picture.update_cost(cost)
+        return True
+
+    def calc_cost(self):
+        """ Calculates the initial cost for all nets
+        assumes:
+            - valid net list in self.nets
+        sets:
+            - self.cost
+        :return: True once complete
+        """
+        cost = 0
+        for i,[source, sinks] in enumerate(self.nets):
+            self.costs[i] = self.calc_half_perimeter(source, sinks)
+            cost += self.costs[i]
+        self.cost = cost
         return True
 
     def calc_half_perimeter(self, source, sinks):
@@ -181,8 +196,6 @@ class Circuit:
         assert self.cells[source].x in range(self.nx) and self.cells[source].y in range(self.ny)
         for sink in sinks:
             assert self.cells[sink].x in range(self.nx) and self.cells[sink].y in range(self.ny)
-            if self.picture is not None:
-                self.picture.draw_net(self.cells[source].x, self.cells[source].y, self.cells[sink].x, self.cells[sink].y)
             dx = abs(self.cells[source].x - self.cells[sink].x)
             if dx > deltax:
                 deltax = dx

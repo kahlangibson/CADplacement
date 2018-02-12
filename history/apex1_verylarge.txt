@@ -1,0 +1,9 @@
+apex1.txt
+Size: 38, 22
+Num Cells: 786
+Minimum Cost: 6792
+   runWith0 : True
+   beta : 0.8
+   exitRate : 0.25
+   startT : 80.0
+   n : 10000
