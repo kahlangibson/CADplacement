@@ -1,7 +1,7 @@
 from Tkinter import *
 import Tkinter as tk
 from math import *
-import random
+from random import *
 from circuit import *
 from time import sleep
 
@@ -57,7 +57,7 @@ class draw(Circuit):
             self.nLoop(temp)
         temp = temp * self.beta
         # update nets
-        sleep(0.01)
+        sleep(0.0001)
         self.drawtemp(temp)
         self.myCanvas.update()
         if self.num_accepted / self.total_proposed > self.exitRate:
@@ -66,7 +66,10 @@ class draw(Circuit):
             self.nLoop(0)
 
     def nLoop(self, temp):
-        sleep(0.01)
+        """
+        :param temp: temperature at which to perform simulated annealing
+        """
+        sleep(0.0001)
         self.total_proposed += 1.
         # randomly choose 2 cells - until at least one is not empty
         while True:
