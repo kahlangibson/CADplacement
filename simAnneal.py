@@ -1,7 +1,6 @@
 from math import *
 from random import *
 from circuit import *
-from time import sleep
 
 class simAnneal(Circuit):
     def __init__(self, startT, beta, exitRate, runWith0, f):

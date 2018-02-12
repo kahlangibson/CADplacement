@@ -1,8 +1,7 @@
 from Tkinter import *
 import Tkinter as tk
-
 from math import *
-from random import *
+import random
 from circuit import *
 from time import sleep
 

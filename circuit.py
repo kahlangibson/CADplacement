@@ -1,6 +1,3 @@
-from random import *
-
-
 class Cell(object):
     """ Cell object with x,y position
     """
