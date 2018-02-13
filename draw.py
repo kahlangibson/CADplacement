@@ -14,6 +14,9 @@ class draw(Circuit):
         self.myCanvas = tk.Canvas(self.myContainer1)
         self.myCanvas.configure(borderwidth=0, highlightthickness=0,width=0,
                                 height=0)
+        # set this to True to *not* run animation
+        self.fast = False
+
         self.cellwidth = 0
         self.cellheight = 0
         self.rect = {}
@@ -44,32 +47,49 @@ class draw(Circuit):
         self.drawcost(self.cost)
 
     def runSimAnneal(self):
-        sleep(0.25)
         temp = self.startT
-        self.drawtemp(temp)
-        self.myCanvas.update()
+        if not self.fast:
+            sleep(0.25)
+            self.drawtemp(temp)
+            self.myCanvas.update()
+
         self.tempLoop(temp)
+
+        if self.fast:
+            self.clear_nets()
+            for source, sinks in self.nets:
+                for sink in sinks:
+                    self.draw_net(source, sink, self.cells[source].x, self.cells[source].y, self.cells[sink].x,
+                                  self.cells[sink].y)
+            self.drawcost(self.cost)
+            for each in self.celltext:
+                self.myCanvas.delete(self.celltext[each])
+            for cell in self.cells:
+                self.place(cell.x, cell.y, self.grid[cell.y][cell.x])
 
     def tempLoop(self, temp):
         self.num_accepted = 0.
         self.total_proposed = 0.
-        for i in range(self.n):
+        for _ in range(self.n):
             self.nLoop(temp)
         temp = temp * self.beta
-        # update nets
-        sleep(0.0001)
-        self.drawtemp(temp)
-        self.myCanvas.update()
+        if not self.fast:
+            # update nets
+            sleep(0.0001)
+            self.drawtemp(temp)
+            self.myCanvas.update()
         if self.num_accepted / self.total_proposed > self.exitRate:
             self.tempLoop(temp)
         else:
-            self.nLoop(0)
+            for _ in range(self.n):
+                self.nLoop(0)
 
     def nLoop(self, temp):
         """
         :param temp: temperature at which to perform simulated annealing
         """
-        sleep(0.0001)
+        if not self.fast:
+            sleep(0.0001)
         self.total_proposed += 1.
         # randomly choose 2 cells
         # pick a cell from list
@@ -78,37 +98,41 @@ class draw(Circuit):
         y1 = c.y
         # randomly pick another position - may be cell, may be empty
         [x2, y2] = sample(range(self.nx), 1) + sample(range(self.ny), 1)
-        self.pick(x1, y1, True)
-        self.pick(x2, y2, True)
+        if not self.fast:
+            self.pick(x1, y1, True)
+            self.pick(x2, y2, True)
         # switch and calculate delta cost
         deltaC = self.compare_switch_cost(x1, y1, x2, y2)
-        self.drawswitch(x1, y1, self.grid[y1][x1], x2, y2, self.grid[y2][x2])
-        self.drawcost(self.cost)
+        if not self.fast:
+            self.drawswitch(x1, y1, self.grid[y1][x1], x2, y2, self.grid[y2][x2])
+            self.drawcost(self.cost)
         # generate random number
         r = random()
         # if random number is gt or eq to probability, switch back to original
         if temp is not 0:
             if r >= exp(-deltaC / temp):
                 self.switch(x1, y1, x2, y2)
-                self.drawswitch(x1, y1, self.grid[y1][x1], x2, y2, self.grid[y2][x2])
-                self.drawcost(self.cost)
-                self.pick(x1, y1, False)
-                self.pick(x2, y2, False)
+                if not self.fast:
+                    self.drawswitch(x1, y1, self.grid[y1][x1], x2, y2, self.grid[y2][x2])
+                    self.drawcost(self.cost)
+                    self.pick(x1, y1, False)
+                    self.pick(x2, y2, False)
             else:
                 self.num_accepted += 1.
         else:
             if deltaC > 0:
                 self.switch(x1, y1, x2, y2)
-                self.drawswitch(x1, y1, self.grid[y1][x1], x2, y2, self.grid[y2][x2])
-                self.drawcost(self.cost)
-                self.pick(x1, y1, False)
-                self.pick(x2, y2, False)
+                if not self.fast:
+                    self.drawswitch(x1, y1, self.grid[y1][x1], x2, y2, self.grid[y2][x2])
+                    self.drawcost(self.cost)
+                    self.pick(x1, y1, False)
+                    self.pick(x2, y2, False)
             else:
                 self.num_accepted += 1.
-
-        self.myCanvas.update()
-        self.unpick(x1,y1)
-        self.unpick(x2,y2)
+        if not self.fast:
+            self.myCanvas.update()
+            self.unpick(x1,y1)
+            self.unpick(x2,y2)
 
     def delete(self):
         self.myCanvas.delete('all')
@@ -266,16 +290,18 @@ class draw(Circuit):
             if id == source:
                 self.costs[i] = self.calc_half_perimeter(source, sinks)
                 cost += self.costs[i]
-                for sink in sinks:
-                    self.remove_net(id, sink)
-                    self.draw_net(id, sink, self.cells[id].x, self.cells[id].y, self.cells[sink].x,
-                                  self.cells[sink].y)
+                if not self.fast:
+                    for sink in sinks:
+                        self.remove_net(id, sink)
+                        self.draw_net(id, sink, self.cells[id].x, self.cells[id].y, self.cells[sink].x,
+                                      self.cells[sink].y)
             elif id in sinks:
-                self.remove_net(source, id)
-                self.draw_net(source, id, self.cells[source].x, self.cells[source].y, self.cells[id].x,
-                              self.cells[id].y)
                 self.costs[i] = self.calc_half_perimeter(source, sinks)
                 cost += self.costs[i]
+                if not self.fast:
+                    self.remove_net(source, id)
+                    self.draw_net(source, id, self.cells[source].x, self.cells[source].y, self.cells[id].x,
+                                  self.cells[id].y)
             else:
                 cost += self.costs[i]
 
